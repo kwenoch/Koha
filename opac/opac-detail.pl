@@ -947,8 +947,8 @@ if ( C4::Context->preference("virtualshelves") ) {
         {
             biblionumber => $biblionumber,
             '-or'        => {
-                public => 1,
-                owner  => $borrowernumber
+                public   => 1,
+                owner_id => $borrowernumber
             }
         },
         {
