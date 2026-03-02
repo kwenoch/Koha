@@ -2247,7 +2247,7 @@ Related object: L<Koha::Schema::Result::Virtualshelve>
 __PACKAGE__->has_many(
   "virtualshelves",
   "Koha::Schema::Result::Virtualshelve",
-  { "foreign.owner" => "self.borrowernumber" },
+  { "foreign.owner_id" => "self.borrowernumber" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
@@ -2302,8 +2302,8 @@ Composing rels: L</user_permissions> -> permission
 __PACKAGE__->many_to_many("permissions", "user_permissions", "permission");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07053 @ 2026-10-29 15:01:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7N7wvGtylZUiYZdL3qnUaw
+# Created by DBIx::Class::Schema::Loader v0.07053 @ 2026-11-23 11:14:56
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fL5gDCe8tyN+KkpGX6Gomg
 
 __PACKAGE__->belongs_to(
   "library",
