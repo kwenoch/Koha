@@ -411,20 +411,22 @@
 
                 [% WRAPPER tabs id= "bibliodescriptions" %]
                     [% WRAPPER tabs_nav %]
-                        [% WRAPPER tab_item tabname= "holdings" %]
-                            [% BLOCK holding_tab_title %]
-                                [% IF SeparateHoldings %]
-                                    <span>[% Branches.GetLoggedInBranchname | html %] holdings</span>
-                                [% ELSE %]
-                                    [% IF specific_item %]
-                                        <span>Item details</span>
+                        [% IF too_many_items OR itemloop.size %]
+                            [% WRAPPER tab_item tabname= "holdings" %]
+                                [% BLOCK holding_tab_title %]
+                                    [% IF SeparateHoldings %]
+                                        <span>[% Branches.GetLoggedInBranchname | html %] holdings</span>
                                     [% ELSE %]
-                                        <span>Holdings</span>
+                                        [% IF specific_item %]
+                                            <span>Item details</span>
+                                        [% ELSE %]
+                                            <span>Holdings</span>
+                                        [% END %]
                                     [% END %]
                                 [% END %]
+                                [% PROCESS holding_tab_title %]
+                                [% UNLESS too_many_items OR specific_item %][% ' ( ' _ (itemloop.size || 0) _ ' )' | html %][% END %]
                             [% END %]
-                            [% PROCESS holding_tab_title %]
-                            [% UNLESS too_many_items OR specific_item %][% ' ( ' _ (itemloop.size || 0) _ ' )' | html %][% END %]
                         [% END %]
 
                         [% IF (SeparateHoldings) %]
@@ -571,56 +573,45 @@
                             [% END # /tab_panel#serialcollection %]
                         [% END # / IF serialcollection %]
 
-                        [% WRAPPER tab_panel tabname="holdings" %]
-                            [% IF too_many_items %]
-                                <p>This record has many physical items ([% items_count | html %]). <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]&amp;viewallitems=1">View all the physical items.</a></p>
-                            [% ELSIF ( itemloop.size ) %]
-                                [% INCLUDE items_table items=itemloop tab="holdings" table_id="holdingst" %]
-                                [% IF specific_item %]
-                                    <p><a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]">Show all items</a></p>
-                                [% ELSE %]
-                                    [% IF Koha.Preference('OPACAcquisitionDetails') and acquisition_details.total_quantity > 0 %]
-                                        [% IF acquisition_details.total_quantity == 1 %]
-                                            <span>1 item is on order.</span>
-                                        [% ELSE %]
-                                            <span>[% acquisition_details.total_quantity | html %] items are on order.</span>
-                                        [% END %]
-                                    [% END %]
-                                    [% IF holds_count.defined || priority %]
-                                        <div id="bib_holds">
-                                            [% IF holds_count.defined %]
-                                                <span>Total holds: [% holds_count | html %]</span>
-                                            [% END %]
-                                            [% IF priority %]
-                                                [% IF holds_count.defined %]
-                                                    <span>(priority [% priority | html %])</span>
-                                                [% ELSE %]
-                                                    <span>Overall queue priority: [% priority | html %]</span>
-                                                [% END %]
-                                            [% END %]
-                                        </div>
-                                    [% END %]
-                                [% END # /IF specific_item %]
-                            [% ELSE %]
-                                [% IF ( ALTERNATEHOLDINGS ) %]
-                                    [% FOREACH ALTERNATEHOLDING IN ALTERNATEHOLDINGS %]
-                                        <div id="alternateholdings"><span class="holdings_label">Holdings:</span> [% ALTERNATEHOLDING.holding | html %]</div>
-                                    [% END %]
-                                [% ELSE %]
-                                    [% IF Koha.Preference('OPACAcquisitionDetails') and acquisition_details.total_quantity > 0 %]
-                                        [% IF acquisition_details.total_quantity == 1 %]
-                                            <span>1 item is on order.</span>
-                                        [% ELSE %]
-                                            <span>[% acquisition_details.total_quantity | html %] items are on order.</span>
-                                        [% END %]
+                        [% IF too_many_items OR itemloop.size %]
+                            [% WRAPPER tab_panel tabname="holdings" %]
+                                [% IF too_many_items %]
+                                    <p
+                                        >This record has many physical items ([% items_count | html %]).
+                                        <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]&amp;viewallitems=1">View all the physical items.</a></p
+                                    >
+                                [% ELSIF ( itemloop.size ) %]
+                                    [% INCLUDE items_table items=itemloop tab="holdings" table_id="holdingst" %]
+                                    [% IF specific_item %]
+                                        <p><a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]">Show all items</a></p>
                                     [% ELSE %]
-                                        <div id="noitems">No physical items for this record</div>
-                                    [% END %]
-                                [% END %]
-                            [% END # IF itemloop.size %]
-                            [% PROCESS 'shelfbrowser.inc' %]
-                            [% INCLUDE shelfbrowser tab='holdings' %]
-                        [% END # /tab_panel#holdings %]
+                                        [% IF Koha.Preference('OPACAcquisitionDetails') and acquisition_details.total_quantity > 0 %]
+                                            [% IF acquisition_details.total_quantity == 1 %]
+                                                <span>1 item is on order.</span>
+                                            [% ELSE %]
+                                                <span>[% acquisition_details.total_quantity | html %] items are on order.</span>
+                                            [% END %]
+                                        [% END %]
+                                        [% IF holds_count.defined || priority %]
+                                            <div id="bib_holds">
+                                                [% IF holds_count.defined %]
+                                                    <span>Total holds: [% holds_count | html %]</span>
+                                                [% END %]
+                                                [% IF priority %]
+                                                    [% IF holds_count.defined %]
+                                                        <span>(priority [% priority | html %])</span>
+                                                    [% ELSE %]
+                                                        <span>Overall queue priority: [% priority | html %]</span>
+                                                    [% END %]
+                                                [% END %]
+                                            </div>
+                                        [% END %]
+                                    [% END # /IF specific_item %]
+                                [% END # IF itemloop.size %]
+                                [% PROCESS 'shelfbrowser.inc' %]
+                                [% INCLUDE shelfbrowser tab='holdings' %]
+                            [% END # /tab_panel#holdings %]
+                        [% END %]
 
                         [% IF (SeparateHoldings) %]
                             [% WRAPPER tab_panel tabname="otherholdings" %]
